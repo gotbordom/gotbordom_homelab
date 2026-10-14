@@ -47,3 +47,15 @@ steps:
             - 'metal/inventories/prod.yml'
             - 'system/rook-ceph/values.yaml'
     depends_on: []
+  permission-tiers:
+    image: nixos/nix
+    commands:
+      - echo 'experimental-features = flakes nix-command' >> /etc/nix/nix.conf
+      - nix develop --command make -C test filter='TestGrafanaRoleMappingConfigured|TestKanidmPermissionTiersDefined'
+    when:
+      - event: pull_request
+        path:
+          include:
+            - 'platform/grafana/values.yaml'
+            - 'scripts/hacks'
+    depends_on: []

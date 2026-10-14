@@ -169,7 +169,7 @@ def setup_kanidm_group(name: str) -> None:
         capture_output=True,
     )
 
-def setup_kanidm_oauth_app(name: str, redirect_uri: str) -> None:
+def setup_kanidm_oauth_app(name: str, redirect_uri: str, groups: list[str]) -> None:
     try:
         subprocess.run(
             ["kanidm", "system", "oauth2", "create", "--url", f"https://{kanidm_host}", "--name", "idm_admin", name, name, redirect_uri],
@@ -186,12 +186,17 @@ def setup_kanidm_oauth_app(name: str, redirect_uri: str) -> None:
         check=True,
     )
 
-    subprocess.run(
-        # TODO better group management
-        ["kanidm", "system", "oauth2", "create-scope-map", "--url", f"https://{kanidm_host}", "--name", "idm_admin", name, "editor", "openid", "profile", "email", "groups"],
-        capture_output=True,
-        check=True,
-    )
+    # Every tier gets the same scopes (openid/profile/email/groups) -- the
+    # scope-map only decides who is allowed to log into this client at all.
+    # Which org role / permissions that turns into downstream (Grafana,
+    # Gitea, etc.) is each app's own job, based on the "groups" claim this
+    # grants them.
+    for group in groups:
+        subprocess.run(
+            ["kanidm", "system", "oauth2", "create-scope-map", "--url", f"https://{kanidm_host}", "--name", "idm_admin", name, group, "openid", "profile", "email", "groups"],
+            capture_output=True,
+            check=True,
+        )
 
     client_secret = json.loads(subprocess.run(
         ["kanidm", "system", "oauth2", "show-basic-secret", "--url", f"https://{kanidm_host}", "--name", "idm_admin", "--output", "json", name],
@@ -228,12 +233,17 @@ def main() -> None:
         ]
 
         kanidm_groups = [
-            # TODO better group management
+            {'name': 'admin'},
             {'name': 'editor'},
+            {'name': 'viewer'},
         ]
 
         kanidm_oauth_apps = [
-            {'name': 'dex', 'redirect_uri': f"https://{client.NetworkingV1Api().read_namespaced_ingress('dex', 'dex').spec.rules[0].host}/callback"},
+            {
+                'name': 'dex',
+                'redirect_uri': f"https://{client.NetworkingV1Api().read_namespaced_ingress('dex', 'dex').spec.rules[0].host}/callback",
+                'groups': ['admin', 'editor', 'viewer'],
+            },
         ]
 
         for token in gitea_access_tokens:
@@ -250,7 +260,7 @@ def main() -> None:
             setup_kanidm_group(group['name'])
 
         for app in kanidm_oauth_apps:
-            setup_kanidm_oauth_app(app['name'], app['redirect_uri'])
+            setup_kanidm_oauth_app(app['name'], app['redirect_uri'], app['groups'])
 
 if __name__ == '__main__':
     main()
