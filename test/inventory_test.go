@@ -4,6 +4,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"regexp"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -14,12 +15,13 @@ type inventoryHost struct {
 	AnsibleHost string `yaml:"ansible_host"`
 }
 
+// inventory vars are deliberately untyped: control_plane_endpoint and
+// load_balancer_ip_pool may reference other vars in this same block via
+// Ansible/Jinja templates (e.g. "{{ metal_subnet_prefix }}.239"), so they're
+// resolved with resolveTemplate before being parsed as addresses.
 type inventory struct {
 	All struct {
-		Vars struct {
-			ControlPlaneEndpoint string   `yaml:"control_plane_endpoint"`
-			LoadBalancerIPPool   []string `yaml:"load_balancer_ip_pool"`
-		} `yaml:"vars"`
+		Vars map[string]interface{} `yaml:"vars"`
 	} `yaml:"all"`
 	Metal struct {
 		Children struct {
@@ -37,6 +39,22 @@ type inventory struct {
 func subnet24(ip net.IP) string {
 	ip4 := ip.To4()
 	return net.IPv4(ip4[0], ip4[1], ip4[2], 0).String()
+}
+
+var templateVarRe = regexp.MustCompile(`\{\{\s*([a-zA-Z0-9_]+)\s*\}\}`)
+
+// resolveTemplate expands simple "{{ var_name }}" references against other
+// scalar vars declared in the same inventory's `all.vars` block. It doesn't
+// implement Jinja -- just enough to let values like control_plane_endpoint
+// derive from a single shared prefix var instead of repeating it.
+func resolveTemplate(s string, vars map[string]string) string {
+	return templateVarRe.ReplaceAllStringFunc(s, func(match string) string {
+		key := templateVarRe.FindStringSubmatch(match)[1]
+		if v, ok := vars[key]; ok {
+			return v
+		}
+		return match
+	})
 }
 
 // TestInventorySubnetConsistency makes sure every address configured for a given
@@ -87,18 +105,30 @@ func TestInventorySubnetConsistency(t *testing.T) {
 					"all metal hosts must be on the same /24 subnet, got: %v", hostDescriptions[i])
 			}
 
-			if endpoint := inv.All.Vars.ControlPlaneEndpoint; endpoint != "" {
+			scalarVars := map[string]string{}
+			for k, v := range inv.All.Vars {
+				if s, ok := v.(string); ok {
+					scalarVars[k] = s
+				}
+			}
+
+			if raw, ok := inv.All.Vars["control_plane_endpoint"].(string); ok && raw != "" {
+				endpoint := resolveTemplate(raw, scalarVars)
 				ip := net.ParseIP(endpoint)
-				require.NotNilf(t, ip, "control_plane_endpoint %q is not a valid IP", endpoint)
+				require.NotNilf(t, ip, "control_plane_endpoint %q (raw: %q) is not a valid IP", endpoint, raw)
 				require.Equalf(t, expectedSubnet, subnet24(ip),
 					"control_plane_endpoint %s must be on the same /24 subnet as the metal hosts (%s.0/24)", endpoint, expectedSubnet)
 			}
 
-			for _, cidr := range inv.All.Vars.LoadBalancerIPPool {
-				ip, _, err := net.ParseCIDR(cidr)
-				require.NoErrorf(t, err, "load_balancer_ip_pool entry %q is not a valid CIDR", cidr)
-				require.Equalf(t, expectedSubnet, subnet24(ip),
-					"load_balancer_ip_pool entry %s must be on the same /24 subnet as the metal hosts (%s.0/24)", cidr, expectedSubnet)
+			if rawPool, ok := inv.All.Vars["load_balancer_ip_pool"].([]interface{}); ok {
+				for _, entry := range rawPool {
+					raw, _ := entry.(string)
+					cidr := resolveTemplate(raw, scalarVars)
+					ip, _, err := net.ParseCIDR(cidr)
+					require.NoErrorf(t, err, "load_balancer_ip_pool entry %q (raw: %q) is not a valid CIDR", cidr, raw)
+					require.Equalf(t, expectedSubnet, subnet24(ip),
+						"load_balancer_ip_pool entry %s must be on the same /24 subnet as the metal hosts (%s.0/24)", cidr, expectedSubnet)
+				}
 			}
 		})
 	}
