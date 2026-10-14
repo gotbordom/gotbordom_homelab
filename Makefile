@@ -29,9 +29,15 @@ post-install:
 # TODO maybe there's a better way to manage backup with GitOps?
 backup:
 	./scripts/backup --action setup --namespace=jellyfin --pvc=jellyfin-data
+	./scripts/backup --action setup --namespace=jupyter --pvc=jupyter-data
+	./scripts/backup --action setup --namespace=kavita --pvc=kavita-data
+	./scripts/backup --action setup --namespace=kavita --pvc=kavita-books
 
 restore:
 	./scripts/backup --action restore --namespace=jellyfin --pvc=jellyfin-data
+	./scripts/backup --action restore --namespace=jupyter --pvc=jupyter-data
+	./scripts/backup --action restore --namespace=kavita --pvc=kavita-data
+	./scripts/backup --action restore --namespace=kavita --pvc=kavita-books
 
 test:
 	make -C test
