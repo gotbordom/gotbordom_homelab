@@ -47,3 +47,16 @@ steps:
             - 'metal/inventories/prod.yml'
             - 'system/rook-ceph/values.yaml'
     depends_on: []
+  gpu-node-selector-consistency:
+    image: nixos/nix
+    commands:
+      - echo 'experimental-features = flakes nix-command' >> /etc/nix/nix.conf
+      - nix develop --command make -C test filter=TestGPUNodeSelectorConsistency
+    when:
+      - event: pull_request
+        path:
+          include:
+            - 'metal/roles/k3s/templates/config.yaml.j2'
+            - 'system/nvidia-device-plugin/values.yaml'
+            - 'apps/ollama/values.yaml'
+    depends_on: []
