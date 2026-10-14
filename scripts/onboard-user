@@ -3,12 +3,20 @@
 username="${1}"
 fullname="${2}"
 mail="${3}"
+tier="${4:-editor}"
+
+case "${tier}" in
+	admin|editor|viewer) ;;
+	*)
+		echo "tier must be one of: admin, editor, viewer (got: ${tier})" >&2
+		exit 1
+		;;
+esac
 
 export KUBECONFIG=./metal/kubeconfig.yaml
 host="$(kubectl get ingress --namespace kanidm kanidm --output jsonpath='{.spec.rules[0].host}')"
 
 kanidm person create "${username}" "${fullname}" --url "https://${host}" --name idm_admin
 kanidm person update "${username}" --url "https://${host}" --name idm_admin --mail "${mail}"
-# TODO better group management
-kanidm group add-members "editor" "${username}" --url "https://${host}" --name idm_admin
+kanidm group add-members "${tier}" "${username}" --url "https://${host}" --name idm_admin
 kanidm person credential create-reset-token "${username}" --url "https://${host}" --name idm_admin
