@@ -17,7 +17,4 @@ metal:
     workers:
       hosts:
         hpz3: {ansible_host: 192.168.0.12, mac: '9c:7b:ef:40:f3:64', disk: sda, network_interface: wlp1s0}
-        # optiplex0: disk is sda or nvme? working tree has disagreed with itself across
-        # recent edits -- confirm the real device before uncommenting, a wrong guess
-        # here wipes the wrong disk.
-        # optiplex0: {ansible_host: 192.168.0.13, mac: '54:bf:64:a3:e4:b2', disk: nvme, network_interface: wlp1s0}
+        optiplex0: {ansible_host: 192.168.0.13, mac: '54:bf:64:a3:e4:b2', disk: sda, network_interface: wlp1s0}
