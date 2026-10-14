@@ -1,11 +1,23 @@
 app-template:
   controllers:
     main:
+      pod:
+        # Only hpz3 carries the k3s "gpu=true" node-label (see
+        # metal/roles/k3s/templates/config.yaml.j2) and the Nvidia
+        # container runtime (see metal/roles/gpu and
+        # system/nvidia-device-plugin) -- without both, requesting
+        # nvidia.com/gpu below would just leave this pod Pending forever.
+        runtimeClassName: nvidia
+        nodeSelector:
+          gpu: "true"
       containers:
         main:
           image:
             repository: docker.io/ollama/ollama
             tag: 0.1.29
+          resources:
+            limits:
+              nvidia.com/gpu: 1
     ui:
       containers:
         main:

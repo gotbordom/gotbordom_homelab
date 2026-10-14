@@ -18,3 +18,10 @@ metal:
       hosts:
         hpz3: {ansible_host: 192.168.0.12, mac: '9c:7b:ef:40:f3:64', disk: sda, network_interface: wlp1s0}
         optiplex0: {ansible_host: 192.168.0.13, mac: '54:bf:64:a3:e4:b2', disk: sda, network_interface: wlp1s0}
+    # Cross-cutting group (not mutually exclusive with masters/workers): any
+    # node with a usable GPU goes here, so GPU driver/runtime setup and k3s
+    # node labeling only ever target nodes that actually have one. Add or
+    # remove hosts here independently of whether they're a master or worker.
+    gpu:
+      hosts:
+        hpz3:

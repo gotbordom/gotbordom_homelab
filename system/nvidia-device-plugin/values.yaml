@@ -1,0 +1,14 @@
+# Only hpz3 is in the metal "gpu" inventory group and gets the k3s
+# "gpu=true" node-label (see metal/roles/k3s/templates/config.yaml.j2) -- this
+# nodeSelector keeps the plugin's DaemonSet off every other node instead of
+# crash-looping where there's no GPU.
+#
+# The chart's own default affinity relies on node-feature-discovery labels
+# (feature.node.kubernetes.io/pci-10de.present) that nothing in this cluster
+# sets, since NFD isn't deployed -- cleared in favor of the plain
+# nodeSelector above.
+nvidia-device-plugin:
+  affinity: null
+  nodeSelector:
+    gpu: "true"
+  runtimeClassName: nvidia
