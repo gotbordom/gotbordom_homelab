@@ -35,6 +35,22 @@ type inventory struct {
 	} `yaml:"metal"`
 }
 
+// loadInventory reads and parses a metal inventory YAML file.
+func loadInventory(file string) (inventory, error) {
+	var inv inventory
+	raw, err := os.ReadFile(file)
+	if err != nil {
+		return inv, err
+	}
+	err = yaml.Unmarshal(raw, &inv)
+	return inv, err
+}
+
+// metalHostCount returns how many masters+workers this inventory defines.
+func (inv inventory) metalHostCount() int {
+	return len(inv.Metal.Children.Masters.Hosts) + len(inv.Metal.Children.Workers.Hosts)
+}
+
 // subnet24 returns the /24 network an IP belongs to, as a string like "192.168.0".
 func subnet24(ip net.IP) string {
 	ip4 := ip.To4()
@@ -75,10 +91,8 @@ func TestInventorySubnetConsistency(t *testing.T) {
 		t.Run(filepath.Base(file), func(t *testing.T) {
 			t.Parallel()
 
-			var inv inventory
-			raw, err := os.ReadFile(file)
+			inv, err := loadInventory(file)
 			require.NoError(t, err)
-			require.NoError(t, yaml.Unmarshal(raw, &inv))
 
 			var hostSubnets []string
 			var hostDescriptions []string
