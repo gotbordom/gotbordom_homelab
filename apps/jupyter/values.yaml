@@ -1,0 +1,64 @@
+app-template:
+  controllers:
+    main:
+      pod:
+        # Only hpz3 carries the k3s "gpu=true" node-label and the Nvidia
+        # container runtime (see metal/roles/gpu and
+        # system/nvidia-device-plugin) -- same pattern as apps/ollama.
+        runtimeClassName: nvidia
+        nodeSelector:
+          gpu: "true"
+        securityContext:
+          # The jupyter/docker-stacks images run as uid/gid 1000 (jovyan) by
+          # default and expect to own their home directory.
+          fsGroup: 1000
+      containers:
+        main:
+          image:
+            # quay.io/jupyter replaced the old jupyter/* Docker Hub images;
+            # the "cuda12-*" tag is the GPU-enabled build. Version pinned to
+            # the current release as of writing (verified against the real
+            # quay.io registry, not guessed).
+            repository: quay.io/jupyter/pytorch-notebook
+            tag: cuda12-pytorch-2.11.0
+          envFrom:
+            # start-notebook.py reads JUPYTER_TOKEN (set here, see
+            # templates/secret.yaml) to use a static access token instead of
+            # generating -- and logging -- a random one on every restart.
+            - secretRef:
+                name: jupyter-secrets
+          resources:
+            limits:
+              nvidia.com/gpu: 1
+  service:
+    main:
+      ports:
+        http:
+          port: 8888
+          protocol: HTTP
+  ingress:
+    main:
+      enabled: true
+      className: nginx
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+      hosts:
+        - host: &host jupyter.elluv.io
+          paths:
+            - path: /
+              pathType: Prefix
+              service:
+                name: main
+                port: http
+      tls:
+        - hosts:
+            - *host
+          secretName: jupyter-tls-certificate
+  persistence:
+    data:
+      accessMode: ReadWriteOnce
+      size: 50Gi
+      advancedMounts:
+        main:
+          main:
+            - path: /home/jovyan/work
