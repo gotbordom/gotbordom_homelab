@@ -122,4 +122,34 @@ Still open from Phase 0: the actual dry-run (pull a node, wipe it, run make meta
 
 **2026-10-29 -- first real PXE installs (hpz3, thinkcenter0).** hpz3's "no route to host" was BIOS-side: Legacy boot mode plus disk ahead of network in the boot order. Fixed to UEFI-only, Secure Boot off, IPv4 network first; it then imaged cleanly. Two inventory bugs surfaced along the way: every node had `network_interface: wlp1s0` (the provisioning laptop's Wi-Fi name, copied in by mistake), which Anaconda silently ignored -- thinkcenter0 came up on DHCP rather than static -- and hpz3's disk is NVMe (`nvme0n1`), not `sda` as recorded above. Fixed by using each node's MAC as `network_interface` (verified on hpz3: static 192.168.0.12 on `eno1`) and correcting hpz3's disk. This is the "if it bites again" case for disk auto-detection above; still deferring it since the fix was one field. Also set the kickstart timezone to UTC (was an inherited `Etc/GMT+11`). Still open: optiplex0's BIOS, Wake-on-LAN from S5 on hpz3 (didn't wake; needs the S5 WoL BIOS settings), and reimaging thinkcenter0 once more to pick up static networking.
 
+## Multi-vendor GPU support (future work, not started)
+
+Phase 2 (GPU on hpz3) is deliberately Nvidia-only -- confirmed Nvidia for
+hpz3, and there's only ever been one GPU vendor to support so far, so
+generalizing up front would have been speculative. If a non-Nvidia GPU node
+joins the inventory later, here's the refactor shape:
+
+- Add a `gpu_vendor` var per host in inventory (not just group membership),
+  since "in the gpu group" no longer implies a single vendor.
+- Split `metal/roles/gpu/tasks/main.yml` into vendor-specific task files
+  (`tasks/nvidia.yml`, `tasks/amd.yml`) included conditionally on
+  `gpu_vendor`, instead of one Nvidia-only task list.
+- AMD's equivalent stack is different, not a drop-in swap: ROCm driver
+  packages instead of RPM Fusion/akmod-nvidia, AMD's own k8s device plugin
+  instead of `system/nvidia-device-plugin`, and critically, no equivalent of
+  Nvidia's custom containerd `runtimeClassName` -- ROCm workloads typically
+  just need `/dev/kfd`/`/dev/dri` device access via the device plugin, so
+  `runtimeClassName: nvidia` doesn't generalize into a vendor-neutral
+  concept, it's simply absent on the AMD path.
+- The k3s node-label should likely become vendor-specific
+  (`gpu-vendor=nvidia` / `gpu-vendor=amd`) rather than the current plain
+  `gpu=true`, since a CUDA-built image can't just run on an AMD node.
+- Apps (Ollama, Jupyter) would need vendor-specific image variants (ROCm
+  builds differ from CUDA builds) selected per deployment, or separate app
+  instances if both vendors need to coexist.
+
+This is a real amount of work, correctly scoped as a follow-up rather than
+something to build speculatively before a second GPU vendor actually exists
+in the inventory.
+
 Live doc: https://claude.ai/artifact/TbXYEro1f7f3v6FrE3hjeC
