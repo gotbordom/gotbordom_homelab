@@ -37,3 +37,10 @@
     - key: PAPERLESS_ADMIN_PASSWORD
       length: 32
       special: true
+
+# Jupyter
+- name: jupyter.admin
+  data:
+    - key: JUPYTER_TOKEN
+      length: 32
+      special: false
