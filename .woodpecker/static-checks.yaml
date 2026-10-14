@@ -59,4 +59,5 @@ steps:
             - 'metal/roles/k3s/templates/config.yaml.j2'
             - 'system/nvidia-device-plugin/values.yaml'
             - 'apps/ollama/values.yaml'
+            - 'apps/jupyter/values.yaml'
     depends_on: []
