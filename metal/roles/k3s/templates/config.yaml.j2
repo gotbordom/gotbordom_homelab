@@ -8,3 +8,7 @@ token-file: {{ k3s_token_file }}
 {{ k3s_server_config | to_nice_yaml }}
 {% endif %}
 snapshotter: stargz
+{% if 'gpu' in group_names %}
+node-label:
+  - "gpu=true"
+{% endif %}

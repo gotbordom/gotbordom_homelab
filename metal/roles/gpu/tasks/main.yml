@@ -1,0 +1,68 @@
+# Assumes an Nvidia GPU (RPM Fusion driver + Nvidia's own Container Toolkit
+# repo). If a GPU-group host ever turns out to be AMD/Intel instead, this role
+# needs a different driver stack entirely -- it will fail loudly on package
+# install rather than silently doing nothing, so that mismatch should be easy
+# to notice rather than appearing to work.
+
+- name: Enable RPM Fusion free repository
+  ansible.builtin.dnf:
+    name: "https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ ansible_distribution_major_version }}.noarch.rpm"
+    state: present
+    disable_gpg_check: true
+
+- name: Enable RPM Fusion nonfree repository
+  ansible.builtin.dnf:
+    name: "https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-{{ ansible_distribution_major_version }}.noarch.rpm"
+    state: present
+    disable_gpg_check: true
+
+- name: Install the Nvidia driver (akmod) and CUDA support
+  ansible.builtin.dnf:
+    name:
+      - akmod-nvidia
+      - xorg-x11-drv-nvidia-cuda
+    state: present
+
+- name: Add the Nvidia Container Toolkit repository
+  ansible.builtin.get_url:
+    url: https://nvidia.github.io/libnvidia-container/stable/rpm/nvidia-container-toolkit.repo
+    dest: /etc/yum.repos.d/nvidia-container-toolkit.repo
+    mode: "0644"
+
+- name: Install the Nvidia Container Toolkit
+  ansible.builtin.dnf:
+    name: nvidia-container-toolkit
+    state: present
+
+- name: Wait for akmods to finish building the Nvidia kernel module
+  ansible.builtin.command: akmods --wait
+  changed_when: false
+
+- name: Check whether the Nvidia kernel module is already loaded
+  ansible.builtin.command: nvidia-smi
+  register: nvidia_smi
+  changed_when: false
+  failed_when: false
+
+- name: Reboot to load the newly built Nvidia kernel module
+  ansible.builtin.reboot:
+    reboot_timeout: 600
+  when: nvidia_smi.rc != 0
+
+- name: Confirm the Nvidia kernel module is loaded after reboot
+  ansible.builtin.command: nvidia-smi
+  changed_when: false
+  when: nvidia_smi.rc != 0
+
+- name: Ensure the containerd config directory exists
+  ansible.builtin.file:
+    path: /var/lib/rancher/k3s/agent/etc/containerd
+    state: directory
+    mode: "0755"
+
+- name: Configure the Nvidia runtime for k3s's embedded containerd
+  ansible.builtin.command: >-
+    nvidia-ctk runtime configure --runtime=containerd
+    --config=/var/lib/rancher/k3s/agent/etc/containerd/config.toml.tmpl
+  register: nvidia_ctk_configure
+  changed_when: "'Current config does not need to be updated' not in nvidia_ctk_configure.stdout"
