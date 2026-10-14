@@ -30,10 +30,16 @@ post-install:
 backup:
 	./scripts/backup --action setup --namespace=actualbudget --pvc=actualbudget-data
 	./scripts/backup --action setup --namespace=jellyfin --pvc=jellyfin-data
+	./scripts/backup --action setup --namespace=jupyter --pvc=jupyter-data
+	./scripts/backup --action setup --namespace=kavita --pvc=kavita-data
+	./scripts/backup --action setup --namespace=kavita --pvc=kavita-books
 
 restore:
 	./scripts/backup --action restore --namespace=actualbudget --pvc=actualbudget-data
 	./scripts/backup --action restore --namespace=jellyfin --pvc=jellyfin-data
+	./scripts/backup --action restore --namespace=jupyter --pvc=jupyter-data
+	./scripts/backup --action restore --namespace=kavita --pvc=kavita-data
+	./scripts/backup --action restore --namespace=kavita --pvc=kavita-books
 
 test:
 	make -C test
