@@ -1,8 +1,11 @@
 # Assumes an Nvidia GPU (RPM Fusion driver + Nvidia's own Container Toolkit
-# repo). If a GPU-group host ever turns out to be AMD/Intel instead, this role
-# needs a different driver stack entirely -- it will fail loudly on package
-# install rather than silently doing nothing, so that mismatch should be easy
-# to notice rather than appearing to work.
+# repo). Confirmed Nvidia for hpz3; kept Nvidia-only deliberately rather than
+# generalized up front, since there's only ever been one GPU vendor to
+# support so far. If/when a non-Nvidia GPU node joins the inventory, see
+# "Multi-vendor GPU support" in docs/roadmap.md for the refactor shape this
+# would need -- it's a real amount of work (per-host gpu_vendor var,
+# vendor-specific task files, a second device-plugin chart, vendor-aware
+# node-labels and app image variants), not a one-line change.
 
 - name: Enable RPM Fusion free repository
   ansible.builtin.dnf:
