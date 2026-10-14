@@ -2,6 +2,11 @@
   hosts: metal
   roles:
     - prerequisites
+    # gpu must run before k3s: it writes k3s's containerd config.toml.tmpl so
+    # the Nvidia runtime is registered the first time k3s itself starts,
+    # avoiding a race where k3s needs restarting after the fact.
+    - role: gpu
+      when: "'gpu' in group_names"
     - k3s
     - automatic_upgrade
 
