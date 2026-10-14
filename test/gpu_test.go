@@ -33,7 +33,7 @@ func TestGPUNodeSelectorConsistency(t *testing.T) {
 	require.Equalf(t, "true", ndp.NvidiaDevicePlugin.NodeSelector["gpu"],
 		"system/nvidia-device-plugin/values.yaml's nodeSelector no longer matches the gpu=true node-label")
 
-	type ollamaValues struct {
+	type appTemplateGPUValues struct {
 		AppTemplate struct {
 			Controllers struct {
 				Main struct {
@@ -44,10 +44,13 @@ func TestGPUNodeSelectorConsistency(t *testing.T) {
 			} `yaml:"controllers"`
 		} `yaml:"app-template"`
 	}
-	raw, err = os.ReadFile("../apps/ollama/values.yaml")
-	require.NoError(t, err)
-	var ollama ollamaValues
-	require.NoError(t, yaml.Unmarshal(raw, &ollama))
-	require.Equalf(t, "true", ollama.AppTemplate.Controllers.Main.Pod.NodeSelector["gpu"],
-		"apps/ollama/values.yaml's main controller nodeSelector no longer matches the gpu=true node-label")
+
+	for _, app := range []string{"ollama", "jupyter"} {
+		raw, err := os.ReadFile("../apps/" + app + "/values.yaml")
+		require.NoError(t, err)
+		var values appTemplateGPUValues
+		require.NoError(t, yaml.Unmarshal(raw, &values))
+		require.Equalf(t, "true", values.AppTemplate.Controllers.Main.Pod.NodeSelector["gpu"],
+			"apps/%s/values.yaml's main controller nodeSelector no longer matches the gpu=true node-label", app)
+	}
 }
