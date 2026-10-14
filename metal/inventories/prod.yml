@@ -11,3 +11,4 @@ metal:
     workers:
       hosts:
         hpz3: {ansible_host: 10.0.0.12, mac: '9c:7b:ef:40:f3:64', disk: sda, network_interface: wlp1s0}
+        optiplex0: {ansible_host: 10.0.0.13, mac: '54:bf:64:a3:e4:b2', disk: sda, network_interface: wlp1s0}
