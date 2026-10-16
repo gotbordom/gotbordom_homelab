@@ -16,5 +16,11 @@ metal:
         thinkcenter0: {ansible_host: 192.168.0.9, mac: '00:23:24:af:ef:30', disk: sda, network_interface: wlp1s0}
     workers:
       hosts:
-        hpz3: {ansible_host: 192.168.0.12, mac: '9c:7b:ef:40:f3:64', disk: sda, network_interface: wlp1s0}
-        optiplex0: {ansible_host: 192.168.0.13, mac: '54:bf:64:a3:e4:b2', disk: sda, network_interface: wlp1s0}
+        # Commented out while we debug why these two don't respond to PXE at
+        # all (likely a BIOS network-boot/UEFI setting, not a config issue
+        # here) -- see system/rook-ceph/values.yaml and the removed
+        # system/kured for the matching single-node adjustments. Re-enable
+        # both together once they're imaging successfully, and revert those
+        # adjustments back to multi-node settings at the same time.
+        # hpz3: {ansible_host: 192.168.0.12, mac: '9c:7b:ef:40:f3:64', disk: sda, network_interface: wlp1s0}
+        # optiplex0: {ansible_host: 192.168.0.13, mac: '54:bf:64:a3:e4:b2', disk: sda, network_interface: wlp1s0}
