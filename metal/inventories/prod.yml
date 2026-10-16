@@ -1,13 +1,20 @@
 all:
   vars:
-    control_plane_endpoint: 192.168.1.100
+    # Single source of truth for the kube-vip "parking" addresses (control-plane
+    # VIP + LB pool): everything below derives from this one prefix, so it can't
+    # drift out of sync with the host subnet again. Picked .239/.240-255 as an
+    # assumed-free high range -- if it collides with your router's DHCP pool,
+    # change metal_subnet_prefix (or the offsets below) and nothing else.
+    metal_subnet_prefix: 192.168.0
+    control_plane_endpoint: "{{ metal_subnet_prefix }}.239"
     load_balancer_ip_pool:
-      - 10.0.0.1/24
+      - "{{ metal_subnet_prefix }}.240/28"
 metal:
   children:
     masters:
       hosts:
-        thinkcenter0: {ansible_host: 10.0.0.11, mac: '00:23:24:af:ef:30', disk: sda, network_interface: wlp1s0}
+        thinkcenter0: {ansible_host: 192.168.0.9, mac: '00:23:24:af:ef:30', disk: sda, network_interface: wlp1s0}
     workers:
       hosts:
-        hpz3: {ansible_host: 10.0.0.12, mac: '9c:7b:ef:40:f3:64', disk: sda, network_interface: wlp1s0}
+        hpz3: {ansible_host: 192.168.0.12, mac: '9c:7b:ef:40:f3:64', disk: sda, network_interface: wlp1s0}
+        optiplex0: {ansible_host: 192.168.0.13, mac: '54:bf:64:a3:e4:b2', disk: sda, network_interface: wlp1s0}

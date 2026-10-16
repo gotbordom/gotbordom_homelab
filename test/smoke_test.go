@@ -24,6 +24,8 @@ func TestSmoke(t *testing.T) {
 		{"homepage", "homepage"},
 		{"kanidm", "kanidm"},
 		{"zot", "zot"},
+		{"jellyfin", "jellyfin"},
+		{"ollama", "ollama"},
 	}
 
 	for _, app := range mainApps {

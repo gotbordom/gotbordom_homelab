@@ -24,3 +24,26 @@ steps:
     when:
       - event: pull_request
     depends_on: []
+  inventory-consistency:
+    image: nixos/nix
+    commands:
+      - echo 'experimental-features = flakes nix-command' >> /etc/nix/nix.conf
+      - nix develop --command make -C test filter=TestInventorySubnetConsistency
+    when:
+      - event: pull_request
+        path:
+          include:
+            - 'metal/inventories/*.yml'
+    depends_on: []
+  storage-replication-consistency:
+    image: nixos/nix
+    commands:
+      - echo 'experimental-features = flakes nix-command' >> /etc/nix/nix.conf
+      - nix develop --command make -C test filter=TestCeph
+    when:
+      - event: pull_request
+        path:
+          include:
+            - 'metal/inventories/prod.yml'
+            - 'system/rook-ceph/values.yaml'
+    depends_on: []
