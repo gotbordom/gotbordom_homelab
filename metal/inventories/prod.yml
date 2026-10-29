@@ -9,12 +9,17 @@ all:
     control_plane_endpoint: "{{ metal_subnet_prefix }}.239"
     load_balancer_ip_pool:
       - "{{ metal_subnet_prefix }}.240/28"
+# network_interface is the wired NIC's MAC rather than a kernel name (eno1,
+# enp0s31f6, ...): Anaconda's `network --device` accepts either, and the MAC
+# is already known from the BIOS so there's nothing to guess. A name that
+# doesn't exist on the box is silently ignored and the node falls back to DHCP.
+# disk must match the real device -- NVMe drives are nvme0n1, not sda.
 metal:
   children:
     masters:
       hosts:
-        thinkcenter0: {ansible_host: 192.168.0.9, mac: '00:23:24:af:ef:30', disk: sda, network_interface: wlp1s0}
+        thinkcenter0: {ansible_host: 192.168.0.9, mac: '00:23:24:af:ef:30', disk: sda, network_interface: '00:23:24:af:ef:30'}
     workers:
       hosts:
-        hpz3: {ansible_host: 192.168.0.12, mac: '9c:7b:ef:40:f3:64', disk: sda, network_interface: wlp1s0}
-        optiplex0: {ansible_host: 192.168.0.13, mac: '54:bf:64:a3:e4:b2', disk: sda, network_interface: wlp1s0}
+        hpz3: {ansible_host: 192.168.0.12, mac: '9c:7b:ef:40:f3:64', disk: nvme0n1, network_interface: '9c:7b:ef:40:f3:64'}
+        optiplex0: {ansible_host: 192.168.0.13, mac: '54:bf:64:a3:e4:b2', disk: sda, network_interface: '54:bf:64:a3:e4:b2'}
