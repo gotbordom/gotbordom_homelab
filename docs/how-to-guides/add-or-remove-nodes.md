@@ -22,6 +22,15 @@ index 7f6474a..1bb2cbc 100644
 +        metal4: {ansible_host: 192.168.1.114, mac: '00:11:22:33:44:55', disk: sda, network_interface: eno1}
 ```
 
+!!! note
+
+    `network_interface` can also be the NIC's MAC address (e.g. `'00:11:22:33:44:55'`), which is
+    easier when you don't know the kernel interface name yet. If the name doesn't exist on the
+    machine, the installer ignores it and the node silently falls back to DHCP. Likewise `disk`
+    must be the real device: NVMe drives are `nvme0n1`, not `sda`.
+
+    The node's firmware must be in UEFI mode with network boot (IPv4) ahead of the internal disk.
+
 Install the OS and join the cluster:
 
 ```
