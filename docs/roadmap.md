@@ -53,7 +53,7 @@ Nothing below matters until the cluster reliably comes up and stays healthy.
 
 **Your own apps**
 
-- The Gitea to Woodpecker to Zot to apps/ to ArgoCD pipeline is a full build-your-own-app-and-ship-it path, which upstream proved with its blog app (since removed here, along with the other upstream-only apps). Adding one of your own apps is writing a chart under apps/<name>/, nothing more.
+- Adding one of your own apps is writing a chart under apps/<name>/, nothing more; ArgoCD picks it up from GitHub. Images you build yourself go through GitHub Actions to ghcr.io (the in-cluster Gitea/Woodpecker/Zot pipeline was dropped -- see the backlog below).
 
 ## Partial -- exists, needs extension
 
@@ -96,6 +96,9 @@ Removed from apps/ on 2026-10-29 to keep the cluster lean; not needed yet. Each 
 - **Paperless-ngx** -- scanned-document archive with OCR and full-text search. Moderate CPU for OCR; storage grows with documents. Personal data, same backup/access caveat.
 - **Excalidraw** -- browser whiteboard / hand-drawn diagrams. Stateless, near-zero cost.
 - **PairDrop** -- AirDrop-style device-to-device file sharing in the browser. Stateless, near-zero cost.
+
+- **WireGuard server** -- self-hosted VPN. Not needed while Tailscale covers remote access; worth bringing back for zero third-party dependency or a backup path. Requires router port-forwarding (UDP 51820). Details in the decision records.
+- **Self-hosted Git/CI/registry (Gitea, Woodpecker, Zot, Renovate)** -- bring back when we need self-hosted Git and container images (private code/images off GitHub, deploys that work without GitHub). Replace Gitea's Bitnami database dependencies when doing so. Details in the decision records.
 
 Also dropped, not in the backlog: blog and Matrix (upstream's personal blog and chat server).
 

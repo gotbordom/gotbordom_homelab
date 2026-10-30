@@ -40,7 +40,7 @@ Everything is automated, after you edit the configuration files, you just need t
 - (2) Bootstrap the `./system` layer:
     - Install ArgoCD and the root app to manage itself and other layers, from now on ArgoCD will do the rest
     - Install the remaining components (storage, monitoring, etc)
-- (3) Build the `./platform` layer (Gitea, Grafana, SSO, etc)
+- (3) Build the `./platform` layer (Grafana, SSO, etc)
 - (4) Deploy applications in the `./apps` layer
 
 ```mermaid
@@ -69,8 +69,6 @@ flowchart TD
   cloudflare -.-> cloudflared
 
   subgraph platform[./platform]
-    Gitea
-    Woodpecker
     Grafana
   end
 

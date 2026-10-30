@@ -42,7 +42,7 @@ More information can be found in [the roadmap](#roadmap) below.
 
 ### Features
 
-- [x] Common applications: Gitea, Jellyfin, Ollama...
+- [x] Common applications: Jellyfin, Ollama...
 - [x] Automated bare metal provisioning with PXE boot
 - [x] Automated Kubernetes installation and management
 - [x] Installing and managing applications using GitOps
@@ -51,7 +51,7 @@ More information can be found in [the roadmap](#roadmap) below.
 - [x] Modular architecture, easy to add or remove features/components
 - [x] Automated certificate management
 - [x] Automatically update DNS records for exposed services
-- [x] VPN (Tailscale or Wireguard)
+- [x] VPN (Tailscale)
 - [x] Expose services to the internet securely with [Cloudflare Tunnel](https://www.cloudflare.com/products/tunnel/)
 - [x] CI/CD platform
 - [x] Private container registry
@@ -77,10 +77,6 @@ They can't capture all the project's features, but they are sufficient to get a 
 | Homepage powered by... [Homepage](https://gethomepage.dev)                                                      |
 | [![][grafana-demo]][grafana-demo]                                                                               |
 | Monitoring dashboard powered by [Grafana](https://grafana.com)                                                  |
-| [![][gitea-demo]][gitea-demo]                                                                                   |
-| Git server powered by [Gitea](https://gitea.io/en-us)                                                           |
-| [![][woodpecker-demo]][woodpecker-demo]                                                                         |
-| Continuous integration with [Woodpecker CI](https://woodpecker-ci.org)                                          |
 | [![][argocd-demo]][argocd-demo]                                                                                 |
 | Continuous deployment with [ArgoCD](https://argoproj.github.io/cd)                                              |
 | [![][alert-demo]][alert-demo]                                                                                   |
@@ -93,8 +89,6 @@ They can't capture all the project's features, but they are sufficient to get a 
 [hubble-demo]: https://github.com/khuedoan/homelab/assets/27996771/9c6677d0-3564-47c0-852b-24b6a554b4a3
 [homepage-demo]: https://github.com/khuedoan/homelab/assets/27996771/d0eaf620-be08-48d8-8420-40bcaa86093b
 [grafana-demo]: https://github.com/khuedoan/homelab/assets/27996771/ad937b26-e9bc-4761-83ae-1c7f512ea97f
-[gitea-demo]: https://github.com/khuedoan/homelab/assets/27996771/c245534f-88d9-4565-bde8-b39f60ccee9e
-[woodpecker-demo]: https://github.com/khuedoan/homelab/assets/27996771/5d887688-d20a-44c8-8f77-0c625527dfe4
 [argocd-demo]: https://github.com/khuedoan/homelab/assets/27996771/527e2529-4fe1-4664-ab8a-b9eb3c492d20
 [alert-demo]: https://github.com/khuedoan/homelab/assets/27996771/c922f755-e911-4ca0-9d4a-6e552d387f18
 [ai-demo]: https://github.com/khuedoan/homelab/assets/27996771/d77ba511-00b7-47c3-9032-55679a099e70

@@ -19,6 +19,73 @@ They are not permanent, we can change them in the future if better alternatives 
 
     - CHANGEME
 
+## Drop the self-hosted Git/CI/registry loop (Gitea, Woodpecker, Zot, Renovate) for now
+
+**Context**
+
+Upstream ran its own build pipeline inside the cluster: Gitea (Git server)
+-> Woodpecker (CI) -> Zot (container registry) -> ArgoCD, with Renovate
+opening dependency PRs against Gitea. After the seed install, ArgoCD switched
+its source from GitHub to the in-cluster Gitea mirror.
+
+On the first real install (2026-10-29), Gitea's PostgreSQL-HA and
+Redis-Cluster failed to start: Gitea's upstream Helm chart pulls them in as
+Bitnami subcharts, and Bitnami stopped publishing free versioned images under
+`docker.io/bitnami` in 2025 (they moved, frozen, to `docker.io/bitnamilegacy`).
+The loop is also three heavy services on small nodes, for capabilities GitHub
+already provides for free.
+
+**Decision**
+
+Remove `platform/gitea`, `platform/woodpecker`, `platform/zot` and
+`platform/renovate`. ArgoCD stays pointed at GitHub permanently. Use GitHub for
+Git, GitHub Actions for CI, `ghcr.io` for any images we build (e.g. a Screeps
+server), and the hosted Renovate GitHub App for dependency updates.
+
+**Consequences**
+
+- The cluster depends on GitHub to deploy changes. If GitHub is down, running
+  workloads keep running; only new changes wait.
+- No in-cluster place to build images; build them in GitHub Actions instead.
+- `.woodpecker/` still holds the CI pipeline definitions (including the
+  static checks). They never ran without Woodpecker -- port them to GitHub
+  Actions.
+- Bring the loop back when we need self-hosted Git and container images:
+  e.g. private code that shouldn't live on GitHub, building images we don't
+  want on a public registry, needing deploys to work without internet/GitHub,
+  or wanting the whole stack self-contained. When doing so, replace the
+  Bitnami-backed Gitea dependencies (Gitea's chart can use an external
+  PostgreSQL, e.g. CloudNativePG, and Valkey/Redis) rather than pinning
+  `bitnamilegacy`, which gets no security updates.
+
+## Use Tailscale only; move the WireGuard server to the backlog
+
+**Context**
+
+Upstream ran both: a self-hosted WireGuard server (`apps/wireguard`) as the
+primary VPN and Tailscale as backup. WireGuard needs a UDP port (51820)
+forwarded on the home router, a public IP or dynamic DNS, and hand-managed
+keys and peer configs for every device. Router admin access is currently
+unavailable, so WireGuard can't work here today.
+
+**Decision**
+
+Keep Tailscale (`apps/tailscale`, a subnet router advertising
+`192.168.0.0/24`) as the only remote-access path. Remove `apps/wireguard` and
+`scripts/get-wireguard-config`.
+
+**Consequences**
+
+- No router changes needed: Tailscale connects outbound and handles NAT
+  traversal and key distribution. Adding a device is install-and-log-in.
+- Relies on Tailscale's coordination servers (free personal tier). Traffic
+  itself is still end-to-end WireGuard-encrypted between devices.
+- Bring a self-hosted WireGuard server back if we want zero third-party
+  dependency for remote access, Tailscale's free tier or terms stop fitting,
+  we need a backup path for when Tailscale's coordination service is down, or
+  we want to give someone access without them having a Tailscale account. It
+  needs router port-forwarding, so router admin access is a prerequisite.
+
 ## Remove the Docker wrapper for Nix shell
 
 **Context**

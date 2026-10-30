@@ -90,22 +90,10 @@ app-template:
                 description: Identity management
                 icon: https://auth.elluv.io/pkg/img/logo-square.svg
           - Development:
-            - Gitea:
-                href: https://git.elluv.io
-                description: Git forge
-                icon: gitea.svg
-            - Woodpecker:
-                href: https://ci.elluv.io
-                description: Continuous integration
-                icon: woodpecker-ci.svg
             - ArgoCD:
                 href: https://argocd.elluv.io
                 description: Continuous deployment
                 icon: argocd.svg
-            - Registry:
-                href: https://registry.elluv.io
-                description: Container registry
-                icon: docker.svg
             - Grafana:
                 href: https://grafana.elluv.io
                 description: Observability dashboards
