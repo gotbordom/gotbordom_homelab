@@ -93,3 +93,12 @@ rook-ceph-cluster:
     enabled: true
     isDefault: false
   cephObjectStores: []
+snapshot-controller:
+  webhook:
+    # The chart generates the webhook's self-signed cert at template time
+    # (genSelfSignedCert), so every ArgoCD render produces a new cert and the
+    # live caBundle/secret drift apart -> x509 errors that block ArgoCD's
+    # server-side diff for the whole rook-ceph app. The validation webhook is
+    # optional (deprecated upstream in favour of CRD validation); snapshots
+    # work without it.
+    enabled: false
