@@ -1,9 +1,10 @@
-# https://dash.cloudflare.com/profile
-cloudflare_email = "myaccount@example.com"
+# Account ID, NOT Zone ID: dashboard -> your domain -> Overview -> right sidebar
 # https://developers.cloudflare.com/fundamentals/setup/find-account-and-zone-ids
 cloudflare_account_id = "foobarid"
+# Custom API token (NOT the Global API Key) with the permissions listed in
+# docs/installation/production/external-resources.md
 # https://dash.cloudflare.com/profile/api-tokens
-cloudflare_api_key = "foobarkey"
+cloudflare_api_token = "foobartoken"
 
 ntfy = {
   # https://ntfy.sh or your own instance

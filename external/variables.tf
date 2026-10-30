@@ -1,10 +1,7 @@
-variable "cloudflare_email" {
-  type = string
-}
-
-variable "cloudflare_api_key" {
-  type      = string
-  sensitive = true
+variable "cloudflare_api_token" {
+  type        = string
+  description = "Scoped Cloudflare API token (see docs/installation/production/external-resources.md for the required permissions)"
+  sensitive   = true
 }
 
 variable "cloudflare_account_id" {
