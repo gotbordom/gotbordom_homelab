@@ -44,3 +44,17 @@ docs:
 
 git-hooks:
 	pre-commit install
+
+# Containerized alternative to `nix develop` (./flake.nix) -- for anywhere
+# without Nix or without access to the Nix daemon. See dev/Dockerfile and
+# docs/concepts/development-shell.md for what's covered and what isn't.
+dev-build:
+	docker build -t homelab-dev -f dev/Dockerfile dev/
+
+dev-shell: dev-build
+	docker run --rm -it \
+		-v $(CURDIR):/workspace \
+		-v homelab-dev-go:/root/go \
+		-v homelab-dev-pip-cache:/root/.cache/pip \
+		-w /workspace \
+		homelab-dev bash
