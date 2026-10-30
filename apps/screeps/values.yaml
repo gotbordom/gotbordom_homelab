@@ -6,18 +6,18 @@
 # `screeps-launcher` (https://github.com/screeps/screeps), meant to be run
 # via `npm install screeps && npx screeps init && npx screeps start`.
 #
-# Following this repo's own convention (see apps/blog, which also references
-# a self-built image rather than a public one): build an image wrapping that
-# npm package in a *separate* Gitea repo, push it through Woodpecker to this
-# cluster's own registry, then this chart will have something to deploy.
-# This value assumes that's been done and the image exists at this path.
+# Build an image wrapping that npm package in a separate GitHub repo and
+# publish it to GitHub's container registry with GitHub Actions (the
+# in-cluster Gitea/Woodpecker/Zot pipeline was dropped -- see
+# docs/reference/architecture/decision-records.md). Until that image exists
+# at this path, this app will sit in ImagePullBackOff.
 app-template:
   controllers:
     main:
       containers:
         main:
           image:
-            repository: registry.elluv.io/screeps
+            repository: ghcr.io/gotbordom/screeps-server
             tag: latest
           env:
             # Required unless the server only ever authenticates players via
