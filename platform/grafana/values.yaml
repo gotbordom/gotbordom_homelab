@@ -32,9 +32,9 @@ grafana:
       token_url: https://dex.elluv.io/token
       api_url: https://dex.elluv.io/userinfo
       # Maps the Kanidm group carried in the OIDC "groups" claim to a Grafana
-      # org role. Anyone not in admin or editor falls through to Viewer rather
-      # than being denied -- being in the viewer group (or any group at all,
+      # org role. Anyone not in homelab_admins or homelab_editors falls through to
+      # Viewer rather than being denied -- being in homelab_viewers (or any group at all,
       # once Kanidm's scope-map grants it login) is enough to read dashboards.
       # Kanidm reports groups as SPNs (admin@auth.elluv.io) by default, or as
       # short names with prefer-short-username -- accept either.
-      role_attribute_path: "(contains(groups[*], 'admin') || contains(groups[*], 'admin@auth.elluv.io')) && 'Admin' || (contains(groups[*], 'editor') || contains(groups[*], 'editor@auth.elluv.io')) && 'Editor' || 'Viewer'"
+      role_attribute_path: "(contains(groups[*], 'homelab_admins') || contains(groups[*], 'homelab_admins@auth.elluv.io')) && 'Admin' || (contains(groups[*], 'homelab_editors') || contains(groups[*], 'homelab_editors@auth.elluv.io')) && 'Editor' || 'Viewer'"

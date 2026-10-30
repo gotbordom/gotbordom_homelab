@@ -35,9 +35,12 @@
 
     ### Access tiers
 
-    - `admin`: full access, including Grafana's Admin org role
-    - `editor`: the original default -- Grafana Editor, access to everything Dex fronts
-    - `viewer`: can log in and view dashboards (Grafana Viewer), but not change anything
+    - `admin` (Kanidm group `homelab_admins`): full access, including Grafana's Admin org role
+    - `editor` (`homelab_editors`): the original default -- Grafana Editor, access to everything Dex fronts
+    - `viewer` (`homelab_viewers`): can log in and view dashboards (Grafana Viewer), but not change anything
+
+    The groups are prefixed because Kanidm names are unique across accounts and
+    groups, and `admin` is Kanidm's built-in admin service account.
 
     Only Grafana actually enforces different behavior per tier today (via `role_attribute_path`
     in `platform/grafana/values.yaml`). Apps without native OIDC group support (Jellyfin, Ollama/Open WebUI)

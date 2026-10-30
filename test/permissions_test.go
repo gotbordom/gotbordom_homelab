@@ -35,8 +35,8 @@ func TestGrafanaRoleMappingConfigured(t *testing.T) {
 }
 
 // TestKanidmPermissionTiersDefined is a light text-level guard that
-// scripts/hacks still provisions all three access tiers (admin, editor,
-// viewer) as Kanidm groups scope-mapped onto the dex oauth2 client. It's not
+// scripts/hacks still provisions all three access tiers (homelab_admins,
+// homelab_editors, homelab_viewers) as Kanidm groups scope-mapped onto the dex oauth2 client. It's not
 // a real parse of the Python source -- just enough to catch someone
 // accidentally dropping a tier back to the old single-"editor" setup.
 func TestKanidmPermissionTiersDefined(t *testing.T) {
@@ -46,7 +46,7 @@ func TestKanidmPermissionTiersDefined(t *testing.T) {
 	require.NoError(t, err)
 	content := string(raw)
 
-	for _, tier := range []string{"admin", "editor", "viewer"} {
+	for _, tier := range []string{"homelab_admins", "homelab_editors", "homelab_viewers"} {
 		require.Containsf(t, content, "'"+tier+"'",
 			"scripts/hacks no longer appears to define the %q tier", tier)
 	}

@@ -5,8 +5,10 @@ fullname="${2}"
 mail="${3}"
 tier="${4:-editor}"
 
+# Tier names map to prefixed Kanidm groups ("admin" alone collides with
+# Kanidm's built-in admin service account).
 case "${tier}" in
-	admin|editor|viewer) ;;
+	admin|editor|viewer) group="homelab_${tier}s" ;;
 	*)
 		echo "tier must be one of: admin, editor, viewer (got: ${tier})" >&2
 		exit 1
@@ -18,5 +20,5 @@ host="$(kubectl get ingress --namespace kanidm kanidm --output jsonpath='{.spec.
 
 kanidm person create "${username}" "${fullname}" --url "https://${host}" --name idm_admin
 kanidm person update "${username}" --url "https://${host}" --name idm_admin --mail "${mail}"
-kanidm group add-members "${tier}" "${username}" --url "https://${host}" --name idm_admin
+kanidm group add-members "${group}" "${username}" --url "https://${host}" --name idm_admin
 kanidm person credential create-reset-token "${username}" --url "https://${host}" --name idm_admin
