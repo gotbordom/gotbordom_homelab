@@ -3,6 +3,9 @@ app-template:
     name: tailscale
   controllers:
     tailscale:
+      pod:
+        hostNetwork: true
+        dnsPolicy: ClusterFirstWithHostNet
       containers:
         app:
           image:
