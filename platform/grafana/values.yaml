@@ -31,3 +31,8 @@ grafana:
       auth_url: https://dex.elluv.io/auth
       token_url: https://dex.elluv.io/token
       api_url: https://dex.elluv.io/userinfo
+      # Maps the Kanidm group carried in the OIDC "groups" claim to a Grafana
+      # org role. Anyone not in admin or editor falls through to Viewer rather
+      # than being denied -- being in the viewer group (or any group at all,
+      # once Kanidm's scope-map grants it login) is enough to read dashboards.
+      role_attribute_path: "contains(groups[*], 'admin') && 'Admin' || contains(groups[*], 'editor') && 'Editor' || 'Viewer'"

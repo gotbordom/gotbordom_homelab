@@ -9,6 +9,7 @@
     - [ ] Full name (John Doe)
     - [ ] Select a username (`johndoe`)
     - [ ] Email address (`johndoe@example.com`)
+    - [ ] Which access tier you need: `admin`, `editor`, or `viewer` (ask if unsure -- `viewer` is the safe default)
 
     ## Install companion apps
 
@@ -24,10 +25,20 @@
 
 === "For admin"
 
-    Run the following script:
+    Run the following script, with the tier as the 4th argument (defaults to `editor` if omitted):
 
     ```sh
-    ./scripts/onboard-user johndoe "John Doe" "johndoe@example.com"
+    ./scripts/onboard-user johndoe "John Doe" "johndoe@example.com" viewer
     ```
 
     Let the user scan the QR code or follow the link to set up passkeys or password + TOTP.
+
+    ### Access tiers
+
+    - `admin`: full access, including Grafana's Admin org role
+    - `editor`: the original default -- Grafana Editor, access to everything Dex fronts
+    - `viewer`: can log in and view dashboards (Grafana Viewer), but not change anything
+
+    Only Grafana actually enforces different behavior per tier today (via `role_attribute_path`
+    in `platform/grafana/values.yaml`). Apps without native OIDC group support (Jellyfin, Ollama/Open WebUI)
+    don't yet distinguish between tiers -- anyone who can log in via Dex has the same access to those.
