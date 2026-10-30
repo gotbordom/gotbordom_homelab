@@ -66,6 +66,12 @@ nav:
     - how-to-guides/disable-dhcp-proxy-in-dnsmasq.md
     - how-to-guides/media-management.md
     - how-to-guides/updating-documentation.md
+    - Runbooks:
+      - how-to-guides/runbooks/dead-node-recovery.md
+      - how-to-guides/runbooks/pause-kured.md
+      - how-to-guides/runbooks/remote-access.md
+      - how-to-guides/runbooks/rebuild-from-dead-laptop.md
+      - how-to-guides/runbooks/control-plane-loss.md
     - Troubleshooting:
       - how-to-guides/troubleshooting/pxe-boot.md
   - Reference:
