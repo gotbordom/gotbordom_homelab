@@ -15,7 +15,6 @@
     For all users:
 
     - [ ] A password manager (I personally recommend [Bitwarden](https://bitwarden.com/download))
-    - [ ] A [Matrix chat client](https://matrix.org/clients) (optional, you can use the web version)
 
     For technical users:
 

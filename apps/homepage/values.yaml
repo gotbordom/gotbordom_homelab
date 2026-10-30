@@ -60,10 +60,6 @@ app-template:
               target: _blank
         services.yaml: |
           - Popular:
-            - Matrix:
-                href: https://chat.elluv.io
-                description: Chat client
-                icon: element.svg
             - Jellyfin:
                 href: https://jellyfin.elluv.io
                 description: Media system (movies, music, etc.)

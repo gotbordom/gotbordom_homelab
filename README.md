@@ -79,8 +79,6 @@ They can't capture all the project's features, but they are sufficient to get a 
 | Monitoring dashboard powered by [Grafana](https://grafana.com)                                                  |
 | [![][gitea-demo]][gitea-demo]                                                                                   |
 | Git server powered by [Gitea](https://gitea.io/en-us)                                                           |
-| [![][matrix-demo]][matrix-demo]                                                                                 |
-| [Matrix](https://matrix.org/) chat server                                                                       |
 | [![][woodpecker-demo]][woodpecker-demo]                                                                         |
 | Continuous integration with [Woodpecker CI](https://woodpecker-ci.org)                                          |
 | [![][argocd-demo]][argocd-demo]                                                                                 |
@@ -96,7 +94,6 @@ They can't capture all the project's features, but they are sufficient to get a 
 [homepage-demo]: https://github.com/khuedoan/homelab/assets/27996771/d0eaf620-be08-48d8-8420-40bcaa86093b
 [grafana-demo]: https://github.com/khuedoan/homelab/assets/27996771/ad937b26-e9bc-4761-83ae-1c7f512ea97f
 [gitea-demo]: https://github.com/khuedoan/homelab/assets/27996771/c245534f-88d9-4565-bde8-b39f60ccee9e
-[matrix-demo]: https://user-images.githubusercontent.com/27996771/149448510-7163310c-2049-4ccd-901d-f11f605bfc32.png
 [woodpecker-demo]: https://github.com/khuedoan/homelab/assets/27996771/5d887688-d20a-44c8-8f77-0c625527dfe4
 [argocd-demo]: https://github.com/khuedoan/homelab/assets/27996771/527e2529-4fe1-4664-ab8a-b9eb3c492d20
 [alert-demo]: https://github.com/khuedoan/homelab/assets/27996771/c922f755-e911-4ca0-9d4a-6e552d387f18

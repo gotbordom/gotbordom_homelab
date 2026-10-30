@@ -77,7 +77,6 @@ flowchart TD
   subgraph apps[./apps]
     homepage[Homepage]
     jellyfin[Jellyfin]
-    matrix[Matrix]
     paperless[Paperless]
   end
 
