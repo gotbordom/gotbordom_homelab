@@ -1,0 +1,77 @@
+# UNLIKE every other app in this repo, this one needs a manual step before it
+# will deploy successfully: there is no official or well-adopted pre-built
+# Screeps private-server image (checked Docker Hub -- the handful that exist
+# are individually-maintained, near-zero-adoption images not worth trusting
+# blind). The official self-host path is the `screeps` npm package plus
+# `screeps-launcher` (https://github.com/screeps/screeps), meant to be run
+# via `npm install screeps && npx screeps init && npx screeps start`.
+#
+# Build an image wrapping that npm package in a separate GitHub repo and
+# publish it to GitHub's container registry with GitHub Actions (the
+# in-cluster Gitea/Woodpecker/Zot pipeline was dropped -- see
+# docs/reference/architecture/decision-records.md). Until that image exists
+# at this path, this app will sit in ImagePullBackOff.
+app-template:
+  controllers:
+    main:
+      containers:
+        main:
+          image:
+            repository: ghcr.io/gotbordom/screeps-server
+            tag: latest
+          env:
+            # Required unless the server only ever authenticates players via
+            # a local Steam client -- get this from
+            # https://steamcommunity.com/dev/apikey and put it in the
+            # screeps-secrets Secret this chart expects (see note below;
+            # this is NOT auto-generated like other apps' credentials,
+            # since it has to come from your own Steam account).
+            STEAM_API_KEY:
+              valueFrom:
+                secretKeyRef:
+                  name: screeps-secrets
+                  key: STEAM_API_KEY
+          # Verified against the official screeps/screeps README: default
+          # game port 21025, CLI port 21026.
+          ports:
+            - name: game
+              containerPort: 21025
+            - name: cli
+              containerPort: 21026
+  service:
+    main:
+      ports:
+        http:
+          port: 21025
+          protocol: HTTP
+  ingress:
+    main:
+      enabled: true
+      className: nginx
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+      hosts:
+        - host: &host screeps.elluv.io
+          paths:
+            - path: /
+              pathType: Prefix
+              service:
+                name: main
+                port: http
+      tls:
+        - hosts:
+            - *host
+          secretName: screeps-tls-certificate
+  persistence:
+    # Default LokiJS file-based storage (db.json) rather than Mongo+Redis --
+    # simpler, no extra services to run, at some cost to performance under
+    # heavy load. The actual mount path depends on whatever working
+    # directory the custom image's Dockerfile uses for `screeps init`; /data
+    # here is a placeholder to be confirmed against that Dockerfile.
+    data:
+      accessMode: ReadWriteOnce
+      size: 10Gi
+      advancedMounts:
+        main:
+          main:
+            - path: /data

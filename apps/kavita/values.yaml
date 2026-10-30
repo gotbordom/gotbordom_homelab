@@ -1,0 +1,57 @@
+app-template:
+  controllers:
+    main:
+      containers:
+        main:
+          image:
+            # Official image (ghcr.io/kizaing/kavita is the old/deprecated
+            # name -- jvmilazz0/kavita on Docker Hub is the current one,
+            # verified against the live registry, not guessed).
+            repository: docker.io/jvmilazz0/kavita
+            tag: "0.9.1"
+  service:
+    main:
+      ports:
+        http:
+          # Verified against Kavita's own Dockerfile (EXPOSE 5000).
+          port: 5000
+          protocol: HTTP
+  ingress:
+    main:
+      enabled: true
+      className: nginx
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+      hosts:
+        - host: &host kavita.elluv.io
+          paths:
+            - path: /
+              pathType: Prefix
+              service:
+                name: main
+                port: http
+      tls:
+        - hosts:
+            - *host
+          secretName: kavita-tls-certificate
+  persistence:
+    # Note: "config" is a reserved persistence key name in app-template's
+    # common library (it silently gets dropped, not an error) -- confirmed by
+    # actually rendering this chart. Using "data" instead, matching the
+    # convention apps/jellyfin already uses for its own config PVC.
+    data:
+      accessMode: ReadWriteOnce
+      size: 5Gi
+      advancedMounts:
+        main:
+          main:
+            - path: /kavita/config
+              subPath: config
+    books:
+      accessMode: ReadWriteOnce
+      size: 100Gi
+      advancedMounts:
+        main:
+          main:
+            - path: /books
+              subPath: books
