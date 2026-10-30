@@ -68,10 +68,6 @@ app-template:
                 href: https://jellyseerr.elluv.io
                 description: Request media
                 icon: jellyseerr.svg
-            - Paperless:
-                href: https://paperless.elluv.io
-                description: Document management system
-                icon: paperless.svg
           - Management:
             - Transmission:
                 href: https://transmission.elluv.io
@@ -115,10 +111,6 @@ app-template:
                 description: Observability dashboards
                 icon: grafana.svg
           - Utilities:
-            - Excalidraw:
-                href: https://draw.elluv.io
-                description: Virtual whiteboard
-                icon: excalidraw.svg
             - Speedtest:
                 href: https://speedtest.elluv.io
                 description: Internal network speed test

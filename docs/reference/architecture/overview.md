@@ -77,7 +77,6 @@ flowchart TD
   subgraph apps[./apps]
     homepage[Homepage]
     jellyfin[Jellyfin]
-    paperless[Paperless]
   end
 
   make[Run make] -- 1 --> metal -- 2 --> system -. 3 .-> platform -. 4 .-> apps

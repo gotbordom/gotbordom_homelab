@@ -53,7 +53,7 @@ Nothing below matters until the cluster reliably comes up and stays healthy.
 
 **Your own apps**
 
-- The Gitea to Woodpecker to Zot to apps/ to ArgoCD pipeline is a full build-your-own-app-and-ship-it path, already proven by the blog, excalidraw, and pairdrop apps living in this repo today. Adding one of your own apps is writing a chart under apps/<name>/, nothing more.
+- The Gitea to Woodpecker to Zot to apps/ to ArgoCD pipeline is a full build-your-own-app-and-ship-it path, which upstream proved with its blog app (since removed here, along with the other upstream-only apps). Adding one of your own apps is writing a chart under apps/<name>/, nothing more.
 
 ## Partial -- exists, needs extension
 
@@ -80,13 +80,24 @@ Nothing below matters until the cluster reliably comes up and stays healthy.
 
 - [ ] Smoke coverage for the workloads you actually care about -- jellyfin and ollama aren't in smoke_test.go's app list at all
 - [ ] A Ceph health/redundancy check (assert pool size and OSD count match expectations) -- directly relevant to the Phase 0 redundancy gap
-- [ ] A real backup/restore test -- scripts/backup is wired for actualbudget and jellyfin only, and nothing currently proves a restore actually recovers data
+- [ ] A real backup/restore test -- scripts/backup is wired for jellyfin only, and nothing currently proves a restore actually recovers data
 - [ ] Any test of the metal/ layer itself (PXE, kickstart, node join) -- today that path is only ever exercised by hand
 - [ ] A GPU scheduling test once that work lands (pod actually gets the GPU on hpz3, doesn't get scheduled onto a GPU-less node)
 
 Note: the upstream project's own docs/reference/roadmap.md still lists "Automated testing" and "Chaos testing" under Unplanned -- this isn't a gap specific to your fork, it's an acknowledged upstream gap too.
 
 (See Progress log below -- jellyfin/ollama smoke coverage and the Ceph redundancy check have since been added.)
+
+## Backlog -- nice-to-have tools
+
+Removed from apps/ on 2026-10-29 to keep the cluster lean; not needed yet. Each was a small chart, so bringing one back is restoring its apps/<name>/ folder from git history (plus its Homepage link, and for Paperless its global-secrets entry).
+
+- **ActualBudget** -- self-hosted envelope budgeting (YNAB-like). Holds personal financial data, so configure volsync backups and admin-only access if restored.
+- **Paperless-ngx** -- scanned-document archive with OCR and full-text search. Moderate CPU for OCR; storage grows with documents. Personal data, same backup/access caveat.
+- **Excalidraw** -- browser whiteboard / hand-drawn diagrams. Stateless, near-zero cost.
+- **PairDrop** -- AirDrop-style device-to-device file sharing in the browser. Stateless, near-zero cost.
+
+Also dropped, not in the backlog: blog and Matrix (upstream's personal blog and chat server).
 
 ## Suggested sequencing
 
