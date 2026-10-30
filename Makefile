@@ -36,6 +36,13 @@ restore:
 test:
 	make -C test
 
+# Turn on when away from home, off at home (on sends LAN traffic through the router)
+routes-on:
+	sudo tailscale set --accept-routes=true
+
+routes-off:
+	sudo tailscale set --accept-routes=false
+
 clean:
 	docker compose --project-directory ./metal/roles/pxe_server/files down
 
