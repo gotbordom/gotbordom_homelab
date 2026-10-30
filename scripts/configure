@@ -17,7 +17,6 @@ upstream_config = {
     "seed_repo": "https://github.com/khuedoan/homelab",
     "domain": "khuedoan.com",
     "timezone": "Asia/Ho_Chi_Minh",
-    "terraform_workspace": "khuedoan",
     "loadbalancer_ip_range": "192.168.1.224/27",
 }
 
@@ -94,18 +93,6 @@ def main() -> None:
     if Confirm.ask("Update server list?", default=True):
         subprocess.run(
             [editor, 'metal/inventories/prod.yml']
-        )
-
-
-    if Confirm.ask("Do you want to use managed services?"):
-        terraform_workspace = Prompt.ask("Enter Terraform Workspace", default=upstream_config['terraform_workspace'])
-
-        find_and_replace(
-            pattern=upstream_config['terraform_workspace'],
-            replacement=terraform_workspace,
-            paths=[
-                "external/versions.tf"
-            ]
         )
 
 

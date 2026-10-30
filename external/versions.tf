@@ -1,14 +1,9 @@
 terraform {
   required_version = "~> 1.7"
 
-  backend "remote" {
-    hostname     = "app.terraform.io"
-    organization = "khuedoan"
-
-    workspaces {
-      name = "homelab-external"
-    }
-  }
+  # State lives next to terraform.tfvars (both gitignored); back them up
+  # together. See docs/installation/production/external-resources.md.
+  backend "local" {}
 
   required_providers {
     cloudflare = {

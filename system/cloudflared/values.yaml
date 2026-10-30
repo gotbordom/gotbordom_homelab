@@ -20,11 +20,15 @@ app-template:
           credentials-file: /etc/cloudflared/credentials.json
           metrics: 0.0.0.0:2000
           no-autoupdate: true
+          # Public hostnames, listed explicitly -- nothing is public by default.
+          # To expose an app, add a rule here AND the tunnel annotations on its
+          # Ingress (docs/how-to-guides/expose-services-to-the-internet.md).
+          # Anything not listed gets a 404 at the tunnel.
           ingress:
-            - hostname: '*.elluv.io'
-              service: https://ingress-nginx-controller.ingress-nginx
-              originRequest:
-                noTLSVerify: true
+            # - hostname: jellyfin.elluv.io
+            #   service: https://ingress-nginx-controller.ingress-nginx
+            #   originRequest:
+            #     noTLSVerify: true
             - service: http_status:404
   persistence:
     config:
