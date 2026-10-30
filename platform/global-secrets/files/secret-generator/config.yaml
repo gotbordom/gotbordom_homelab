@@ -5,3 +5,9 @@
       length: 32
       special: false
 
+# Jupyter
+- name: jupyter.admin
+  data:
+    - key: JUPYTER_TOKEN
+      length: 32
+      special: false
