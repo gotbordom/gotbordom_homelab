@@ -15,9 +15,6 @@ Save the following files to a safe location like a password manager (if you're u
 - ArgoCD:
     - Username: `admin`
     - Password: run `./scripts/argocd-admin-password`
-- Gitea:
-    - Username: `gitea_admin`
-    - Password: get from `global-secrets` namespace
 - Kanidm:
     - Usernames: `admin` and `idm_admin`
     - Password: run `./scripts/kanidm-reset-password admin` and `./scripts/kanidm-reset-password idm_admin`
