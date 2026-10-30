@@ -69,21 +69,26 @@ def setup_kanidm_group(name: str) -> None:
     )
 
 def setup_kanidm_oauth_app(name: str, redirect_uri: str, groups: list[str]) -> None:
-    try:
+    exists = subprocess.run(
+        ["kanidm", "system", "oauth2", "get", "--url", f"https://{kanidm_host}", "--name", "idm_admin", name],
+        capture_output=True,
+    ).returncode == 0
+
+    # Create the client only once, but fall through either way so re-runs
+    # still apply scope-map changes (e.g. tiers added after first install).
+    if not exists:
         subprocess.run(
             ["kanidm", "system", "oauth2", "create", "--url", f"https://{kanidm_host}", "--name", "idm_admin", name, name, redirect_uri],
             capture_output=True,
             check=True,
         )
-    except subprocess.CalledProcessError:
-        return
 
-    # TODO https://github.com/dexidp/dex/pull/3188
-    subprocess.run(
-        ["kanidm", "system", "oauth2", "warning-insecure-client-disable-pkce", "--url", f"https://{kanidm_host}", "--name", "idm_admin", name],
-        capture_output=True,
-        check=True,
-    )
+        # TODO https://github.com/dexidp/dex/pull/3188
+        subprocess.run(
+            ["kanidm", "system", "oauth2", "warning-insecure-client-disable-pkce", "--url", f"https://{kanidm_host}", "--name", "idm_admin", name],
+            capture_output=True,
+            check=True,
+        )
 
     # Every tier gets the same scopes (openid/profile/email/groups) -- the
     # scope-map only decides who is allowed to log into this client at all.
@@ -92,7 +97,7 @@ def setup_kanidm_oauth_app(name: str, redirect_uri: str, groups: list[str]) -> N
     # grants them.
     for group in groups:
         subprocess.run(
-            ["kanidm", "system", "oauth2", "create-scope-map", "--url", f"https://{kanidm_host}", "--name", "idm_admin", name, group, "openid", "profile", "email", "groups"],
+            ["kanidm", "system", "oauth2", "update-scope-map", "--url", f"https://{kanidm_host}", "--name", "idm_admin", name, group, "openid", "profile", "email", "groups"],
             capture_output=True,
             check=True,
         )
