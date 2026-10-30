@@ -88,7 +88,7 @@ def setup_kanidm_oauth_app(name: str, redirect_uri: str, groups: list[str]) -> N
     # Every tier gets the same scopes (openid/profile/email/groups) -- the
     # scope-map only decides who is allowed to log into this client at all.
     # Which org role / permissions that turns into downstream (Grafana,
-    # Gitea, etc.) is each app's own job, based on the "groups" claim this
+    # Jellyfin, etc.) is each app's own job, based on the "groups" claim this
     # grants them.
     for group in groups:
         subprocess.run(
