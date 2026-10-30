@@ -23,6 +23,10 @@ dex:
             - profile
             - email
             - groups
+          # Dex's generic OIDC connector drops the upstream "groups" claim
+          # unless this is set; without it Grafana sees no groups and every
+          # user falls through to Viewer.
+          insecureEnableGroups: true
     staticClients:
       - id: grafana-sso
         name: Grafana

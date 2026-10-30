@@ -35,4 +35,6 @@ grafana:
       # org role. Anyone not in admin or editor falls through to Viewer rather
       # than being denied -- being in the viewer group (or any group at all,
       # once Kanidm's scope-map grants it login) is enough to read dashboards.
-      role_attribute_path: "contains(groups[*], 'admin') && 'Admin' || contains(groups[*], 'editor') && 'Editor' || 'Viewer'"
+      # Kanidm reports groups as SPNs (admin@auth.elluv.io) by default, or as
+      # short names with prefer-short-username -- accept either.
+      role_attribute_path: "(contains(groups[*], 'admin') || contains(groups[*], 'admin@auth.elluv.io')) && 'Admin' || (contains(groups[*], 'editor') || contains(groups[*], 'editor@auth.elluv.io')) && 'Editor' || 'Viewer'"
