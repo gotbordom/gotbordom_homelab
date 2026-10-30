@@ -30,22 +30,25 @@ To use a [remote backend](https://opentofu.org/docs/language/settings/backends/c
 ### Cloudflare
 
 - Use a domain whose DNS is on Cloudflare: either [add an existing domain](https://developers.cloudflare.com/fundamentals/setup/manage-domains/add-site/) and point its nameservers at Cloudflare (registration and website hosting can stay where they are), or buy one through Cloudflare Registrar
-- Get Cloudflare email and account ID
-- Global API key: <https://dash.cloudflare.com/profile/api-tokens>
+- Get the **Account ID** (not the Zone ID): dashboard -> your domain -> Overview -> right sidebar
+- Create a **custom API token** at <https://dash.cloudflare.com/profile/api-tokens> (don't use the Global API Key -- it has full control of the account):
 
-<!-- TODO switch to API token instead of API key? -->
-<!-- Terraform API token summary: -->
+| Scope   | Permission                 | Why                                                        |
+| ------- | -------------------------- | ---------------------------------------------------------- |
+| Account | Cloudflare Tunnel: Edit    | Create the `homelab` tunnel                                |
+| Account | Account Settings: Read     | Look up the account                                        |
+| User    | API Tokens: Edit           | Create the narrower external-dns and cert-manager tokens   |
+| Zone    | Zone: Read                 | Look up the zone                                           |
+| Zone    | DNS: Edit                  | Create the tunnel DNS record                               |
 
-<!-- ``` -->
-<!-- This API token will affect the below accounts and zones, along with their respective permissions -->
+  Limit the zone resources to your domain only.
 
-<!-- └── Khue Doan - Argo Tunnel:Edit, Account Settings:Read -->
-<!--     └── khuedoan.com - Zone:Read, DNS:Edit -->
+!!! warning
 
-<!-- Client IP Address Filtering -->
-
-<!-- └── Is in - 117.xxx.xxx.xxx, 2402:xxx:xxx:xxx:xxx:xxx:xxx:xxx -->
-<!-- ``` -->
+    The pinned Cloudflare provider (v4.30) only accepts API tokens that are
+    exactly 40 characters of `A-Z a-z 0-9 - _`. On a format error, the
+    provider echoes the rejected value in its error message -- don't share
+    that output.
 
 <!-- ### Create Minio keys -->
 
