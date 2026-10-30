@@ -120,16 +120,18 @@ def setup_kanidm_oauth_app(name: str, redirect_uri: str, groups: list[str]) -> N
 def main() -> None:
     with Console().status("Completing the remaining sorcery"):
         kanidm_groups = [
-            {'name': 'admin'},
-            {'name': 'editor'},
-            {'name': 'viewer'},
+            # Prefixed: plain "admin" collides with Kanidm's built-in admin
+            # service account (names are unique across accounts and groups).
+            {'name': 'homelab_admins'},
+            {'name': 'homelab_editors'},
+            {'name': 'homelab_viewers'},
         ]
 
         kanidm_oauth_apps = [
             {
                 'name': 'dex',
                 'redirect_uri': f"https://{client.NetworkingV1Api().read_namespaced_ingress('dex', 'dex').spec.rules[0].host}/callback",
-                'groups': ['admin', 'editor', 'viewer'],
+                'groups': ['homelab_admins', 'homelab_editors', 'homelab_viewers'],
             },
         ]
 
