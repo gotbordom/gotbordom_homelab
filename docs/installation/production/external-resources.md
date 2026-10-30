@@ -9,7 +9,6 @@ Below is a list of external resources and why we need them (also see some [alter
 
 | Provider        | Resource  | Purpose                                                                                                     |
 | --------        | --------  | -------                                                                                                     |
-| Terraform Cloud | Workspace | Terraform state backend                                                                                     |
 | Cloudflare      | DNS       | DNS and [DNS-01 challenge](https://letsencrypt.org/docs/challenge-types/#dns-01-challenge) for certificates |
 | Cloudflare      | Tunnel    | Public services to the internet without port forwarding                                                     |
 | ntfy            | Topic     | External notification service to receive alerts                                                             |
@@ -18,19 +17,19 @@ Below is a list of external resources and why we need them (also see some [alter
 
 You'll be asked to provide these credentials on first build.
 
-### Create Terraform workspace
+### Terraform state
 
-Terraform is stateful, which means it needs somewhere to store its state. Terraform Cloud is one option for a state backend with a generous free tier, perfect for a homelab.
+OpenTofu state is stored locally in `external/terraform.tfstate`, next to
+`external/terraform.tfvars`. Both are gitignored and both contain secrets --
+back them up together (e.g. in a password manager). If the state is lost,
+`make external` will try to recreate everything; delete the old `homelab`
+tunnel and `homelab_*` API tokens in Cloudflare by hand first.
 
-1. Sign up for a [Terraform Cloud](https://cloud.hashicorp.com/products/terraform) account
-2. Create a workspace named `homelab-external`, this is the workspace where your homelab state will be stored.
-3. Change the "Execution Mode" from "Remote" to "Local". This will ensure your local machine, which can access your lab, is the one executing the Terraform plan rather than the cloud runners.
-
-If you decide to use a [different Terraform backend](https://www.terraform.io/language/settings/backends#available-backends), you'll need to edit the `external/versions.tf` file as required.
+To use a [remote backend](https://opentofu.org/docs/language/settings/backends/configuration/) instead, edit `external/versions.tf`.
 
 ### Cloudflare
 
-- Buy a domain and [transfer it to Cloudflare](https://developers.cloudflare.com/registrar/get-started/transfer-domain-to-cloudflare) if you haven't already
+- Use a domain whose DNS is on Cloudflare: either [add an existing domain](https://developers.cloudflare.com/fundamentals/setup/manage-domains/add-site/) and point its nameservers at Cloudflare (registration and website hosting can stay where they are), or buy one through Cloudflare Registrar
 - Get Cloudflare email and account ID
 - Global API key: <https://dash.cloudflare.com/profile/api-tokens>
 
@@ -64,8 +63,8 @@ If you decide to use a [different Terraform backend](https://www.terraform.io/la
 
 To avoid vendor lock-in, each external provider must have an equivalent alternative that is easy to replace:
 
-- Terraform Cloud:
-    - Any other [Terraform backends](https://www.terraform.io/language/settings/backends)
+- Local state:
+    - Any other [OpenTofu backend](https://opentofu.org/docs/language/settings/backends/configuration/)
 - Cloudflare DNS:
     - Update cert-manager and external-dns to use a different provider
     - [Alternate DNS setup](../../how-to-guides/alternate-dns-setup.md)
