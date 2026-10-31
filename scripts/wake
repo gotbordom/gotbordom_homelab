@@ -1,0 +1,33 @@
+#!/bin/sh
+
+# Send a Wake-on-LAN packet to a node in the inventory.
+# Nodes boot to network when woken, so refuse if the PXE server could reinstall them.
+
+set -eu
+
+node="${1:-}"
+inventory="metal/inventories/prod.yml"
+
+if [ -z "${node}" ]; then
+    echo "Usage: make wake node=<name>" >&2
+    exit 1
+fi
+
+mac="$(sed -n "s/^ *${node}: .*mac: '\([^']*\)'.*/\1/p" "${inventory}")"
+
+if [ -z "${mac}" ]; then
+    echo "No MAC found for '${node}' in ${inventory}" >&2
+    exit 1
+fi
+
+if ! pxe="$(docker compose --project-directory ./metal/roles/pxe_server/files ps --quiet)"; then
+    echo "Can't check whether the PXE server is running, not waking ${node}" >&2
+    exit 1
+fi
+
+if [ -n "${pxe}" ]; then
+    echo "PXE server is running and could reinstall ${node}. Stop it with 'make clean' first." >&2
+    exit 1
+fi
+
+wakeonlan "${mac}"
