@@ -43,6 +43,9 @@ routes-on:
 routes-off:
 	sudo tailscale set --accept-routes=false
 
+wake:
+	@./scripts/wake $(node)
+
 clean:
 	docker compose --project-directory ./metal/roles/pxe_server/files down
 
