@@ -1,0 +1,52 @@
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: jellyfin-settings-backup-repository
+  namespace: {{ .Release.Namespace }}
+spec:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: global-secrets
+  target:
+    template:
+      data:
+        RESTIC_REPOSITORY: "s3:{{ "{{ .restic_s3_bucket }}" }}/{{ .Release.Namespace }}/jellyfin-settings"
+        RESTIC_PASSWORD: "{{ "{{ .restic_password }}" }}"
+        AWS_ACCESS_KEY_ID: "{{ "{{ .restic_s3_access_key }}" }}"
+        AWS_SECRET_ACCESS_KEY: "{{ "{{ .restic_s3_secret_key }}" }}"
+  data:
+    - secretKey: restic_s3_bucket
+      remoteRef:
+        key: external
+        property: restic-s3-bucket
+    - secretKey: restic_s3_access_key
+      remoteRef:
+        key: external
+        property: restic-s3-access-key
+    - secretKey: restic_s3_secret_key
+      remoteRef:
+        key: external
+        property: restic-s3-secret-key
+    - secretKey: restic_password
+      remoteRef:
+        key: external
+        property: restic-password
+---
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationSource
+metadata:
+  name: jellyfin-settings
+  namespace: {{ .Release.Namespace }}
+spec:
+  sourcePVC: jellyfin-settings
+  trigger:
+    schedule: "0 10 * * *"
+  restic:
+    repository: jellyfin-settings-backup-repository
+    pruneIntervalDays: 14
+    retain:
+      daily: 7
+      weekly: 4
+      monthly: 3
+    copyMethod: Snapshot
+    volumeSnapshotClassName: ceph-block
