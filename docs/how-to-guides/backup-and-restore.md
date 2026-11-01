@@ -74,33 +74,79 @@ You may want to back up the `external/terraform.tfvars` file to a secure locatio
 
 ## Add backup configuration for volumes
 
+Backups are defined in git, next to the app they protect. Each app has a `templates/backup.yaml` with:
+
+- An `ExternalSecret` that builds the Restic repository secret from the global secrets above.
+- A VolSync `ReplicationSource` that sets the volume, schedule and retention.
+
+See `platform/kanidm/templates/backup.yaml` for an example. To back up another volume, copy it, then change the volume
+name and the schedule.
+
+| Volume | Schedule (UTC) | Notes |
+|---|---|---|
+| `kanidm/data-kanidm-0` | 09:30 | SSO accounts and credentials |
+| `jellyfin/jellyfin-settings` | 10:00 | Settings for all the media apps |
+
+These aren't backed up: `jellyfin/jellyfin-data` (media and downloads) and `ollama/ollama-data` (models can be downloaded
+again).
+
 !!! warning
 
-    Do not run the backup command when building a new cluster where you intend
-    to restore backups, as it may overwrite existing backup data. To restore
-    data on a new cluster, refer to the [restore from
-    backup](#restore-from-backup) section.
+    VolSync backs up a whole volume, so keep large replaceable data on a separate volume from anything you want to back up.
 
-For now, you need to run a command to opt-in volumes until we have a better
-GitOps solution:
+A new `ReplicationSource` runs once as soon as it's created, then follows its schedule. It skips the backup if the volume
+is empty.
+
+!!! note
+
+    `make backup` and `make restore` use `scripts/backup`, which creates resources by hand and only covers a volume named
+    `jellyfin-data`. Don't use `make backup`: that volume now holds media, and it would be uploaded.
+
+## Check backups
 
 ```sh
-make backup
+kubectl get replicationsources -A
+kubectl -n kanidm get replicationsource data-kanidm-0 -o jsonpath='{.status.latestMoverStatus.result} {.status.lastSyncTime}{"\n"}'
 ```
 
-This command will set up Restic repositories and back up the volumes configured
-in `./Makefile`. You can adjust the list there to add or remove volumes from the
-backup. You only need to run this command once, the backup configuration will
-be stored in the cluster and run on a schedule.
+## Test a restore
+
+Restore into a throwaway volume, so the app's real volume isn't touched:
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: {name: restore-test, namespace: kanidm}
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: standard-rwo
+  resources: {requests: {storage: 1Gi}}
+---
+apiVersion: volsync.backube/v1alpha1
+kind: ReplicationDestination
+metadata: {name: restore-test, namespace: kanidm}
+spec:
+  trigger: {manual: restore-test-1}
+  restic:
+    repository: data-kanidm-0-backup-repository
+    destinationPVC: restore-test
+    copyMethod: Direct
+```
+
+When `status.latestMoverStatus.result` is `Successful`, mount `restore-test` in a temporary pod to check the files. This
+was last done for Kanidm on 2026-11-01, including an SQLite integrity check of its database. Then delete the test
+resources.
 
 ## Restore from backup
 
-The restore process is ad-hoc, you need to run a command to restore application volumes:
+!!! danger
 
-```sh
-make restore
-```
+    This overwrites what's on the volume. Test on a throwaway volume first, and stop the app before restoring over its data.
+    A real restore over a live volume hasn't been tried on this cluster yet.
 
-The command above will restore the latest backup of recommended volumes. Like
-with backups, you can modify `./Makefile` to adjust the list of volumes you
-want to restore.
+Scale the app down, then create a `ReplicationDestination` as above, with `destinationPVC` set to the app's volume.
+
+## Other backups
+
+The nightly backups don't cover the files needed to recover the cluster itself, so also run `make recovery-backup`. See
+[Recover from a dead laptop](runbooks/rebuild-from-dead-laptop.md).

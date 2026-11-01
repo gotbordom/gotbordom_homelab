@@ -15,7 +15,17 @@ laptop, so there's no rush.
 | Tailscale login | Remote access only | Sign in again |
 | GitHub login | Repo access and merges | Recover through GitHub |
 
-This repo is public, so these files must never be committed. Store them in a password manager or similar.
+This repo is public, so these files must never be committed. `make recovery-backup` writes them to an encrypted file on
+the backup drive, along with an etcd snapshot and the k3s token. The passphrase is stored separately, in a password manager.
+
+To restore them from the backup drive:
+
+```sh
+gpg -d /path/to/homelab-recovery-<date>.tar.gz.gpg | tar -xzf - -C ~/restore
+```
+
+The archive's paths are relative to the repo (`external/`, `metal/`, `last-state.md`) and to your home folder (`.ssh/`,
+`homelab-recovery/`), so copy each file to the right place. Create `~/restore` first.
 
 ## Set up the new machine
 
@@ -60,12 +70,12 @@ kubectl -n argocd get applications
 kubectl -n rook-ceph exec deploy/rook-ceph-operator -- ceph --conf /var/lib/rook/rook-ceph/rook-ceph.config -s
 ```
 
-If Terraform files were restored, confirm that the state matches reality. This should report no changes:
+If Terraform files were restored, confirm that the state matches reality. This should report no changes. `KUBE_CONFIG_PATH`
+is only set for you by the root `make external`, so set it here:
 
 ```sh
-cd external
-tofu init
-tofu plan
+export KUBE_CONFIG_PATH=$PWD/metal/kubeconfig.yaml
+make -C external plan
 ```
 
 Read a plan carefully before you apply it.
@@ -80,8 +90,9 @@ Read a plan carefully before you apply it.
 
 ### No SSH key
 
-Try any other machine with an authorized key. Otherwise, you need physical access to a node's console. If you can't log
-in there either, a node has to be reimaged to install a new key, which is a large job on the control plane. See
+Try any other machine with an authorized key, or use `kubectl` if you still have the kubeconfig. **You can't log in at a
+node's console**: the imaging setup locks `root` and sets no other usable login. Without either, a node has to be reimaged
+to install a new key, which is a large job on the control plane. See
 [Add or remove nodes](../add-or-remove-nodes.md) and [Recover from control plane loss](control-plane-loss.md).
 
 ### No kubeconfig
