@@ -46,6 +46,9 @@ routes-off:
 wake:
 	@./scripts/wake $(node)
 
+recovery-backup:
+	@./scripts/recovery-backup $(dest)
+
 clean:
 	docker compose --project-directory ./metal/roles/pxe_server/files down
 

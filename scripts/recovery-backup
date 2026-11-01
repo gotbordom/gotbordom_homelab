@@ -1,0 +1,66 @@
+#!/bin/sh
+
+# Write an encrypted archive of the files needed to recover the homelab without
+# this laptop, including the newest etcd snapshot and k3s token from the control plane.
+# The passphrase should be stored somewhere other than the backup drive.
+
+set -eu
+
+dest="${1:-/media/$(id -un)/homelab-backup}"
+control_plane="192.168.0.9"
+snapshots="/var/lib/rancher/k3s/server/db/snapshots"
+expected_files=8
+
+if [ ! -d "${dest}" ] || [ ! -w "${dest}" ]; then
+    echo "Can't write to ${dest}. Is the backup drive plugged in?" >&2
+    exit 1
+fi
+
+umask 077
+tmp="$(mktemp -d)"
+trap 'rm -rf "${tmp}"' EXIT
+
+mkdir -p "${tmp}/homelab-recovery/snapshots"
+
+snapshot="$(ssh "root@${control_plane}" "ls -t ${snapshots} | head -n 1")"
+
+if [ -z "${snapshot}" ]; then
+    echo "No etcd snapshots found on ${control_plane}" >&2
+    exit 1
+fi
+
+echo "Fetching etcd snapshot ${snapshot} and the k3s token"
+scp -q "root@${control_plane}:${snapshots}/${snapshot}" "${tmp}/homelab-recovery/snapshots/"
+scp -q "root@${control_plane}:/var/lib/rancher/k3s/server/token" "${tmp}/homelab-recovery/k3s-token"
+
+archive="${dest}/homelab-recovery-$(date -u +%Y-%m-%dT%H%M%SZ).tar.gz.gpg"
+
+echo "Encrypting to ${archive}"
+tar -czf - \
+    external/terraform.tfvars \
+    external/terraform.tfstate \
+    metal/kubeconfig.yaml \
+    last-state.md \
+    -C "${HOME}" \
+    .ssh/id_ed25519 \
+    .ssh/id_ed25519.pub \
+    -C "${tmp}" \
+    homelab-recovery/k3s-token \
+    "homelab-recovery/snapshots/${snapshot}" \
+    | gpg --symmetric --cipher-algo AES256 --output "${archive}.partial"
+
+sync
+
+echo "Checking the archive can be decrypted"
+count="$(gpg --decrypt --quiet "${archive}.partial" | tar -tzf - | wc -l)"
+
+if [ "${count}" -ne "${expected_files}" ]; then
+    echo "Expected ${expected_files} files in the archive, found ${count}. Keeping ${archive}.partial" >&2
+    exit 1
+fi
+
+mv "${archive}.partial" "${archive}"
+sync
+
+echo "Done: ${archive}"
+echo "Older backups in ${dest} were left in place."
