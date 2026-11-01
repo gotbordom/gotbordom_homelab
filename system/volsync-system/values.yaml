@@ -1,0 +1,4 @@
+volsync:
+  metrics:
+    # Prometheus has no credentials for the auth proxy, so every scrape gets a 401
+    disableAuth: true

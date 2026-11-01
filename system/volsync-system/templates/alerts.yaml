@@ -1,0 +1,23 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: volsync-backups
+  namespace: {{ .Release.Namespace }}
+spec:
+  groups:
+    - name: volsync-backups
+      rules:
+        - alert: VolSyncBackupOutOfSync
+          expr: volsync_volume_out_of_sync == 1
+          for: 1h
+          labels:
+            severity: critical
+          annotations:
+            summary: "Backup of {{ "{{ $labels.obj_namespace }}/{{ $labels.obj_name }}" }} isn't completing"
+        - alert: VolSyncMetricsAbsent
+          expr: absent(volsync_volume_out_of_sync)
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            summary: "No backup metrics from VolSync, so failed backups wouldn't raise an alert"
