@@ -1,4 +1,11 @@
 kube-prometheus-stack:
+  # k3s runs these in one process and Cilium replaces kube-proxy, so there's nothing to scrape
+  kubeControllerManager:
+    enabled: false
+  kubeScheduler:
+    enabled: false
+  kubeProxy:
+    enabled: false
   grafana:
     enabled: false
     forceDeployDatasources: true
@@ -41,10 +48,16 @@ kube-prometheus-stack:
         group_interval: 5m
         repeat_interval: 12h
         routes:
-          - receiver: ntfy
+          # Always firing, to prove the alerting pipeline works
+          - receiver: "null"
             matchers:
               - alertname = "Watchdog"
+          # Compares raw PG counts, so it always fires on OSDs of different sizes
+          - receiver: "null"
+            matchers:
+              - alertname = "CephPGImbalance"
       receivers:
+        - name: "null"
         - name: ntfy
           webhook_configs:
             - url: http://localhost:8081
