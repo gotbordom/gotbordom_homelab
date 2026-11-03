@@ -80,7 +80,7 @@ Nothing below matters until the cluster reliably comes up and stays healthy.
 
 - [ ] Smoke coverage for the workloads you actually care about -- jellyfin and ollama aren't in smoke_test.go's app list at all
 - [ ] A Ceph health/redundancy check (assert pool size and OSD count match expectations) -- directly relevant to the Phase 0 redundancy gap
-- [ ] A real backup/restore test -- scripts/backup is wired for jellyfin only, and nothing currently proves a restore actually recovers data
+- [ ] An automated backup/restore test -- restores of Kanidm and the Jellyfin settings have only been tested by hand, to throwaway volumes
 - [ ] Any test of the metal/ layer itself (PXE, kickstart, node join) -- today that path is only ever exercised by hand
 - [ ] A GPU scheduling test once that work lands (pod actually gets the GPU on hpz3, doesn't get scheduled onto a GPU-less node)
 

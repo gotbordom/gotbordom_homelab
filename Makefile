@@ -26,13 +26,6 @@ smoke-test:
 post-install:
 	@./scripts/hacks
 
-# TODO maybe there's a better way to manage backup with GitOps?
-backup:
-	./scripts/backup --action setup --namespace=jellyfin --pvc=jellyfin-data
-
-restore:
-	./scripts/backup --action restore --namespace=jellyfin --pvc=jellyfin-data
-
 test:
 	make -C test
 
