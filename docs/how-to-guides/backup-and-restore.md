@@ -97,11 +97,6 @@ again).
 A new `ReplicationSource` runs once as soon as it's created, then follows its schedule. It skips the backup if the volume
 is empty.
 
-!!! note
-
-    `make backup` and `make restore` use `scripts/backup`, which creates resources by hand and only covers a volume named
-    `jellyfin-data`. Don't use `make backup`: that volume now holds media, and it would be uploaded.
-
 ## Check backups
 
 ```sh
