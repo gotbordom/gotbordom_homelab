@@ -106,28 +106,22 @@ app-template:
         bookmarks.yaml: |
           - Homelab:
             - Documentation:
-              - href: https://homelab.elluv.io
+              - href: https://github.com/gotbordom/gotbordom_homelab/tree/master/docs
                 icon: google-docs.svg
-            - Public homelab repository:
-              - href: https://github.com/khuedoan/homelab
+            - Homelab repository:
+              - href: https://github.com/gotbordom/gotbordom_homelab
                 icon: github.svg
           - Managed services:
             - Cloudflare:
               - href: https://dash.cloudflare.com
                 icon: cloudflare.svg
-            - Terraform Cloud:
-              - href: https://app.terraform.io
-                icon: terraform.svg
+            - Tailscale:
+              - href: https://login.tailscale.com/admin
+                icon: tailscale.svg
+            - Backblaze B2:
+              - href: https://secure.backblaze.com/b2_buckets.htm
+                icon: backblaze.svg
           - Infrastructure:
             - Router:
-              - href: https://192.168.1.1
+              - href: http://192.168.0.1
                 icon: router.svg
-            - Proxmox:
-              - href: https://proxmox:8006
-                icon: proxmox.svg
-            - Google Cloud:
-              - href: https://console.cloud.google.com
-                icon: google-cloud-platform.svg
-            - Oracle Cloud:
-              - href: https://cloud.oracle.com
-                icon: oracle-cloud.svg
