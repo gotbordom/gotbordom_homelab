@@ -13,11 +13,11 @@ spec:
           labels:
             severity: critical
           annotations:
-            summary: "Backup of {{ "{{ $labels.obj_namespace }}/{{ $labels.obj_name }}" }} isn't completing"
+            description: "Backup of {{ "{{ $labels.obj_namespace }}/{{ $labels.obj_name }}" }} isn't completing"
         - alert: VolSyncMetricsAbsent
           expr: absent(volsync_volume_out_of_sync)
           for: 1h
           labels:
             severity: warning
           annotations:
-            summary: "No backup metrics from VolSync, so failed backups wouldn't raise an alert"
+            description: "No backup metrics from VolSync, so failed backups wouldn't raise an alert"
